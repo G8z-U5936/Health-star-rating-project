@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result - {{ product_name }}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 { color: #333; margin-bottom: 5px; }
+        .product-name { color: #666; font-size: 18px; margin-bottom: 20px; }
+        img {
+            border-radius: 15px;
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .rating-section {
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .rating-red { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border: 2px solid #e57373; }
+        .rating-yellow { background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%); border: 2px solid #ffd54f; }
+        .rating-green { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border: 2px solid #81c784; }
+        .rating-label { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .stars { font-size: 36px; letter-spacing: 5px; }
+        .rating-red .star-filled, .rating-red .star-half { color: #e53935; }
+        .rating-yellow .star-filled, .rating-yellow .star-half { color: #ffc107; }
+        .rating-green .star-filled, .rating-green .star-half { color: #43a047; }
+        .star-empty { color: #ddd; }
+        .rating-number { font-size: 24px; font-weight: bold; margin-top: 10px; }
+        .rating-red .rating-number { color: #c62828; }
+        .rating-yellow .rating-number { color: #f9a825; }
+        .rating-green .rating-number { color: #2e7d32; }
+        .rating-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+        .rating-red .rating-badge { background: #e53935; color: white; }
+        .rating-yellow .rating-badge { background: #ffc107; color: #333; }
+        .rating-green .rating-badge { background: #43a047; color: white; }
+        .health-icon {
+            width: 100px;
+            height: 100px;
+            margin: 15px auto 10px;
+        }
+        .health-icon svg { width: 100%; height: 100%; }
+        .nutrition-section {
+            margin-top: 25px;
+            text-align: left;
+        }
+        .nutrition-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .nutrition-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .nutrition-table tr { border-bottom: 1px solid #eee; }
+        .nutrition-table td {
+            padding: 12px 10px;
+            font-size: 14px;
+        }
+        .nutrition-table td:first-child { color: #666; }
+        .nutrition-table td:last-child { 
+            text-align: right; 
+            font-weight: 600;
+            color: #333;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis Result</h1>
+        <p class="product-name">{{ product_name }}</p>
+        
+        <img src="{{ image }}" alt="Product Image">
+        
+        {% set star_val = stars|float %}
+        {% if star_val <= 2 %}
+            {% set rating_class = "rating-red" %}
+            {% set rating_text = "Poor" %}
+        {% elif star_val <= 3.5 %}
+            {% set rating_class = "rating-yellow" %}
+            {% set rating_text = "Average" %}
+        {% else %}
+            {% set rating_class = "rating-green" %}
+            {% set rating_text = "Healthy" %}
+        {% endif %}
+        
+        <div class="rating-section {{ rating_class }}">
+            <div class="rating-label">Health Star Rating</div>
+            <div class="stars">
+                {% for i in range(1, 6) %}
+                    {% if i <= star_val|int %}
+                        <span class="star-filled">★</span>
+                    {% elif i == (star_val|int + 1) and (star_val - star_val|int) >= 0.5 %}
+                        <span class="star-half">★</span>
+                    {% else %}
+                        <span class="star-empty">★</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="rating-number">{{ "%.1f"|format(stars) }} / 5.0</div>
+            
+            <div class="health-icon">
+                {% if star_val <= 2 %}
+                <!-- Overweight person icon -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="20" r="15" fill="#e53935"/>
+                    <ellipse cx="50" cy="55" rx="28" ry="30" fill="#e53935"/>
+                    <rect x="25" y="80" width="12" height="18" rx="4" fill="#e53935"/>
+                    <rect x="63" y="80" width="12" height="18" rx="4" fill="#e53935"/>
+                    <circle cx="45" cy="18" r="2" fill="white"/>
+                    <circle cx="55" cy="18" r="2" fill="white"/>
+                    <path d="M 43 25 Q 50 28 57 25" stroke="white" stroke-width="2" fill="none"/>
+                    <text x="50" y="60" text-anchor="middle" fill="white" font-size="20">😰</text>
+                </svg>
+                {% elif star_val <= 4 %}
+                <!-- Average person icon -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="18" r="14" fill="#f9a825"/>
+                    <ellipse cx="50" cy="52" rx="18" ry="22" fill="#f9a825"/>
+                    <rect x="28" y="78" width="10" height="20" rx="4" fill="#f9a825"/>
+                    <rect x="62" y="78" width="10" height="20" rx="4" fill="#f9a825"/>
+                    <circle cx="45" cy="16" r="2" fill="white"/>
+                    <circle cx="55" cy="16" r="2" fill="white"/>
+                    <line x1="45" y1="23" x2="55" y2="23" stroke="white" stroke-width="2"/>
+                    <text x="50" y="57" text-anchor="middle" fill="white" font-size="16">🙂</text>
+                </svg>
+                {% else %}
+                <!-- Fit person icon -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="16" r="12" fill="#2e7d32"/>
+                    <polygon points="50,30 65,50 60,50 60,70 40,70 40,50 35,50" fill="#2e7d32"/>
+                    <rect x="35" y="72" width="10" height="22" rx="3" fill="#2e7d32"/>
+                    <rect x="55" y="72" width="10" height="22" rx="3" fill="#2e7d32"/>
+                    <line x1="30" y1="38" x2="20" y2="28" stroke="#2e7d32" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="70" y1="38" x2="80" y2="28" stroke="#2e7d32" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="46" cy="14" r="2" fill="white"/>
+                    <circle cx="54" cy="14" r="2" fill="white"/>
+                    <path d="M 45 20 Q 50 24 55 20" stroke="white" stroke-width="2" fill="none"/>
+                    <text x="50" y="62" text-anchor="middle" fill="white" font-size="12">💪</text>
+                </svg>
+                {% endif %}
+            </div>
+            
+            <div class="rating-badge">{{ rating_text }}</div>
+        </div>
+        
+        <div class="nutrition-section">
+            <div class="nutrition-title">Nutritional Information (per 100g)</div>
+            <table class="nutrition-table">
+                <tr><td>Energy</td><td>{{ nutrition.energy_kj }} kJ</td></tr>
+                <tr><td>Total Fat</td><td>{{ nutrition.total_fat_g }} g</td></tr>
+                <tr><td>Saturated Fat</td><td>{{ nutrition.saturated_fat_g }} g</td></tr>
+                <tr><td>Carbohydrates</td><td>{{ nutrition.carbohydrates_g }} g</td></tr>
+                <tr><td>Total Sugars</td><td>{{ nutrition.total_sugars_g }} g</td></tr>
+                <tr><td>Protein</td><td>{{ nutrition.protein_g }} g</td></tr>
+                <tr><td>Fibre</td><td>{{ nutrition.fibre_g }} g</td></tr>
+                <tr><td>Sodium</td><td>{{ nutrition.sodium_mg }} mg</td></tr>
+            </table>
+        </div>
+        
+        <a href="/" class="back-link">Analyze More</a>
+    </div>
+</body>
+</html>

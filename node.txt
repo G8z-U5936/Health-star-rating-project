@@ -1,0 +1,1 @@
+create a python flask project with a home page. add a upload image upload button analyse button

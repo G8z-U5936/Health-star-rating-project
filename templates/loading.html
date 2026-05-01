@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analyzing...</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .steps {
+            text-align: left;
+            margin: 0 auto;
+            max-width: 300px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        .step:last-child { border-bottom: none; }
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .step-pending .step-icon {
+            background: #f0f0f0;
+            color: #999;
+        }
+        .step-active .step-icon {
+            background: #667eea;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        .step-done .step-icon {
+            background: #4CAF50;
+            color: white;
+        }
+        .step-text {
+            flex: 1;
+            font-size: 14px;
+        }
+        .step-pending .step-text { color: #999; }
+        .step-active .step-text { color: #333; font-weight: 500; }
+        .step-done .step-text { color: #4CAF50; }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #e74c3c;
+            padding: 15px;
+            background: #ffeaea;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analyzing Your Product</h1>
+        <p class="subtitle">Please wait while we process the image</p>
+        
+        <img src="{{ image }}" alt="Product" class="image-preview">
+        
+        <div class="steps">
+            <div class="step step-pending" id="step1">
+                <div class="step-icon">1</div>
+                <div class="step-text">Extracting text from image</div>
+            </div>
+            <div class="step step-pending" id="step2">
+                <div class="step-icon">2</div>
+                <div class="step-text">Parsing nutrition data with AI</div>
+            </div>
+            <div class="step step-pending" id="step3">
+                <div class="step-icon">3</div>
+                <div class="step-text">Mapping nutrition data</div>
+            </div>
+            <div class="step step-pending" id="step4">
+                <div class="step-icon">4</div>
+                <div class="step-text">Calculating Health Star Rating</div>
+            </div>
+        </div>
+        
+        <div class="spinner"></div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        const jobId = "{{ job_id }}";
+        const eventSource = new EventSource(`/stream/${jobId}`);
+        
+        function setStepActive(stepNum) {
+            const step = document.getElementById(`step${stepNum}`);
+            if (step) {
+                step.className = 'step step-active';
+                step.querySelector('.step-icon').innerHTML = '⋯';
+            }
+        }
+        
+        function setStepDone(stepNum) {
+            const step = document.getElementById(`step${stepNum}`);
+            if (step) {
+                step.className = 'step step-done';
+                step.querySelector('.step-icon').innerHTML = '✓';
+            }
+        }
+        
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            if (data.status === 'progress') {
+                const step = data.step;
+                
+                if (step === 'step1') setStepActive(1);
+                else if (step === 'step1_done') setStepDone(1);
+                else if (step === 'step2') setStepActive(2);
+                else if (step === 'step2_done') setStepDone(2);
+                else if (step === 'step3') setStepActive(3);
+                else if (step === 'step3_done') setStepDone(3);
+                else if (step === 'step4') setStepActive(4);
+                else if (step === 'step4_done') setStepDone(4);
+            }
+            else if (data.status === 'complete') {
+                eventSource.close();
+                window.location.href = data.redirect;
+            }
+            else if (data.status === 'error') {
+                eventSource.close();
+                document.querySelector('.spinner').style.display = 'none';
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = 'Error: ' + data.message;
+                errorDiv.style.display = 'block';
+            }
+        };
+        
+        eventSource.onerror = function() {
+            eventSource.close();
+            document.querySelector('.spinner').style.display = 'none';
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = 'Connection error. Please refresh the page.';
+            errorDiv.style.display = 'block';
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Healthify - Food Health Analyzer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, #eef1f5 0%, #dce0e8 100%);
+            transform: scale(1.02);
+        }
+        .upload-area.dragover {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        .upload-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        .upload-text {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+        .file-input {
+            display: none;
+        }
+        .preview-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .file-name {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        .change-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 8px;
+            text-decoration: underline;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+        }
+        .feature {
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .feature-text {
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🍎</div>
+        <h1>Healthify</h1>
+        <p class="subtitle">Upload a food product image to get its Health Star Rating</p>
+        
+        <form action="/analyze" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📸</div>
+                <p class="upload-text">Drag & drop your image here</p>
+                <p class="upload-hint">or click to browse • PNG, JPG up to 10MB</p>
+                <input type="file" name="image" accept="image/*" class="file-input" id="fileInput" required>
+            </div>
+            
+            <div class="preview-container" id="previewContainer">
+                <img src="" alt="Preview" class="preview-image" id="previewImage">
+                <p class="file-name" id="fileName"></p>
+                <button type="button" class="change-btn" id="changeBtn">Change image</button>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                <span>⭐</span> Analyze Health Rating
+            </button>
+        </form>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-text">OCR Scanning</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-text">AI Analysis</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⭐</div>
+                <div class="feature-text">Star Rating</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const changeBtn = document.getElementById('changeBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                fileInput.files = files;
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        changeBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            uploadArea.style.display = 'block';
+            previewContainer.style.display = 'none';
+            submitBtn.disabled = true;
+        });
+        
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    fileName.textContent = file.name;
+                    uploadArea.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                    submitBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>
