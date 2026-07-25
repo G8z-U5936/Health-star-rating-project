@@ -2,12 +2,6 @@
 
 Upload a photo of a food nutrition label and get its Australian Health Star Rating (HSR) in seconds, powered by OCR and AI.
 
-![home page](image-1.png)
-
-![AI engine running](image-2.png)
-
-![Results](image-3.png)
-
 ## How It Works
 
 1. **Upload** — Snap or select a photo of a food product's nutrition label.
@@ -118,3 +112,20 @@ Different lookup tables are used for Category 1/2 foods vs. Category 3 (fats/oil
 - **AI**: GPT-5.4 Nano via OpenRouter API (OpenAI-compatible)
 - **Real-time**: Server-Sent Events (SSE)
 - **Frontend**: HTML, CSS, Jinja2 templates
+
+## Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><b>Upload Page</b></td>
+      <td align="center"><b>AI Analysis</b></td>
+      <td align="center"><b>Results</b></td>
+    </tr>
+    <tr>
+      <td><img src="image-1.webp" width="280"/></td>
+      <td><img src="image-2.webp" width="280"/></td>
+      <td><img src="image-3.webp" width="280"/></td>
+    </tr>
+  </table>
+</div>
