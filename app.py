@@ -6,7 +6,7 @@ import uuid
 from main import analyze_product_with_status
 
 app = Flask(__name__)
-app.secret_key = 'healthify-secret-key-change-in-production'
+app.secret_key = 
 
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
