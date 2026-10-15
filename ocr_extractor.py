@@ -20,7 +20,7 @@ class TextExtractor:
 
         except Exception as e:
             print(f"Unexpected Error: {e}")
-
+                   
 
 
 

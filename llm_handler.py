@@ -47,34 +47,57 @@ NUTRITION_EXTRACTION_SYSTEM_PROMOT = """
     "key_ingredients": ["<top 3-5 main ingredients>"]
     }
 """
-
-# --- NEW FEATURE: INGREDIENTS EXTRACTION PROMPT ---
+# --------------------------------------------------
 INGREDIENTS_EXTRACTION_SYSTEM_PROMPT = """
-    You are an expert food label analyst specializing in ingredient lists. 
-    Given OCR-extracted text, identify the ingredients list and extract the data accurately.
+    You are an expert food product label parser specializing in ingredient list extraction for Health Star Rating (HSR) systems. Given OCR-extracted text from a food product image, extract, correct, and structure the product's ingredient list.
 
     **Instructions:**
-    1. Locate the "Ingredients" section.
-    2. Clean OCR noise (e.g., "lngredients" -> "Ingredients", "0il" -> "Oil").
-    3. Break down nested ingredients (e.g., "Chocolate (Sugar, Cocoa Butter, Milk)").
-    4. Identify food additives and their functions if mentioned (e.g., "E322 Emulsifier").
-    5. Flag artificial colors, flavors, or preservatives.
+    1. Identify the INGREDIENTS section from the text (look for headers like "Ingredients:", "Contains:", "Composition:", etc.).
+    2. Fix common OCR text corruption (e.g., "Sogah" → "Sugar", "Palnr Oii" → "Palm Oil", misread commas, or broken parentheses).
+    3. Process and list ingredients in order of predominance.
+    4. Flag key Health Star Rating specific drivers (FVNL content, added sugars, non-nutritive sweeteners, artificial additives).
+    5. Classify the product category based on the ingredients list.
+
+    **Category Classification:**
+    Classify the product into ONE of these categories:
+    - "1D" - Dairy beverages (dairy-based drinks)
+    - "2" - Foods (general food products)
+    - "2D" - Dairy foods (yogurt, etc.)
+    - "3" - Fats, oils
+    - "3D" - Cheese products
 
     **Output Format:**
-    
-```json
+    ```json
     {
-    "product_name": "<extracted or 'Unknown'>",
-    "full_ingredients_list": ["<item 1>", "<item 2>", ...],
-    "additives": [
-        {"name": "<name/code>", "function": "<e.g. preservative/color>"}
-    ],
-    "contains_artificial_flavors": <boolean>,
-    "contains_preservatives": <boolean>,
-    "dietary_claims": ["<e.g. Vegan, Gluten-Free, No Added Sugar>"]
+      "product_name": "<extracted or 'Unknown'>",
+      "category": "<1D|2|2D|3|3D>",
+      "ingredients_text_raw": "<cleaned full text block of the ingredient statement>",
+       "servings_per_pack": "<number or 'N/A'>",
+        "nutrition_per_100g": {
+        "energy_kj": <number>,
+        "carbohydrate_g": <number>,
+        "total_sugars_g": <number>,
+        "added_sugars_g": <number>,
+        "total_fat_g": <number>,
+        "saturated_fat_g": <number>,
+        "trans_fat_g": <number>,
+        "protein_g": <number>,
+        "sodium_mg": <number>,
+        "fibre_g": <number>
+        } 
+      "hsr_flags": {
+        "contains_fvnl": <true|false>,
+        "fvnl_ingredients": ["<list of identified FVNL ingredients>"],
+        "contains_added_sugar": <true|false>,
+        "contains_artificial_sweeteners": <true|false>
+      },
+      "allergens_declared": ["<list of explicitly declared allergens>"],
+      "may_contain_allergens": ["<list of cross-contamination/trace allergens>"],
+      "additives_and_ins_numbers": ["<list of E/INS numbers or food additives>"]
     }
     ```
 """
+
 
 class LLMHandler:
     def __init__(self):
@@ -97,7 +120,7 @@ class LLMHandler:
                     "role": "user",
                     "content": ocr_text
                 }
-            ],
+            ], 
             # Forces the model to output valid JSON
             response_format = {"type": "json_object"},
             extra_body = {
@@ -151,8 +174,6 @@ class LLMHandler:
         except json.JSONDecodeError:
             print("Model failed to provide valid JSON for ingredients.")
             return raw_content
-
-
 
 
 

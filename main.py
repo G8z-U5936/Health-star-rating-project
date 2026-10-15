@@ -20,7 +20,10 @@ def analyze_product_with_status(image_path):
     llm_handler = LLMHandler()
     nutrition_data = llm_handler.extract_nutrition(ocr_text)
     yield ("step2_done", "Nutrition data extracted ✓")
-    
+
+    # "Parsing ingredients_data with AI..."
+    ingredients_data = llm_handler.extract_ingredients(ocr_text)
+    print(ingredients_data)
     # Step 3: Mapping
     yield ("step3", "Mapping nutrition data...")
     n = nutrition_data.get("nutrition_per_100g", {})
